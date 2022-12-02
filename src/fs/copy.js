@@ -9,6 +9,13 @@ const pathFrom = path.join(__dirname, 'files');
 const pathTo = path.join(__dirname, 'files_copy');
 
 
+const getFolders = async () =>
+    (await fs.promises
+        .readdir(__dirname, { withFileTypes: true }))
+        .filter(item => item.isDirectory())
+        .map(item => item.name)
+
+
 async function copyFolder(src, dest) {
     try {
         await fs.promises.mkdir(dest, { recursive: true });
@@ -32,22 +39,12 @@ async function copyFolder(src, dest) {
 }
 
 const copy = async () => {
-
-    fs.access(pathFrom, err => {
-        if (err) {
-            throw new Error('FS operation failed');
-        } else {
-            copyFolder(pathFrom, pathTo);
-        }
-    })
-
-    fs.access(pathTo, err => {
-        if (err) {
-            copyFolder(pathFrom, pathTo);
-        } else {
-            throw new Error('FS operation failed');
-        }
-    })
+    const allFolders = await getFolders()
+    if (allFolders.includes('files_copy') || !allFolders.includes('files')) {
+        throw new Error('FS operation failed');
+    } else {
+        copyFolder(pathFrom, pathTo);
+    }
 };
 
 copy();

@@ -13,7 +13,11 @@ const list = async () => {
             throw new Error('FS operation failed');
         } else {
             (async () => {
-                const files = await fs.promises.readdir(pathTo)
+                const files = (await fs.promises
+                    .readdir(pathTo, { withFileTypes: true }))
+                    .filter(item => item.isFile())
+                    .map(item => item.name)
+
                 for (const file of files) {
                     console.log(file)
                 }
